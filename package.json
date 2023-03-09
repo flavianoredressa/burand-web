@@ -1,0 +1,84 @@
+{
+  "name": "@burand/web",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf lib",
+    "lint": "tsc --noEmit && eslint --ext .js,.ts .",
+    "build": "npm run clean && tsc"
+  },
+  "engines": {
+    "node": "18"
+  },
+  "files": [
+    "lib/",
+    "package.json"
+  ],
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "exceptions": [
+        "./lib/exceptions"
+      ],
+      "firestore": [
+        "./lib/firestore"
+      ],
+      "resources": [
+        "./lib/resources"
+      ],
+      "typings": [
+        "./lib/typings"
+      ],
+      "utils": [
+        "./lib/utils"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js"
+    },
+    "./exceptions": {
+      "types": "./lib/exceptions/index.d.ts",
+      "import": "./lib/exceptions/index.js"
+    },
+    "./firestore": {
+      "types": "./lib/firestore/index.d.ts",
+      "import": "./lib/firestore/index.js"
+    },
+    "./resources": {
+      "types": "./lib/resources/index.d.ts",
+      "import": "./lib/resources/index.js"
+    },
+    "./typings": {
+      "types": "./lib/typings/index.d.ts",
+      "import": "./lib/typings/index.js"
+    },
+    "./utils": {
+      "types": "./lib/utils/index.d.ts",
+      "import": "./lib/utils/index.js"
+    }
+  },
+  "type": "module",
+  "dependencies": {
+    "@angular/fire": "^7.5.0",
+    "rxjs": "^7.8.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@burand/eslint-config-functions": "github:flavianoredressa/burand-eslint-config-functions",
+    "@types/uuid": "^9.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.54.1",
+    "@typescript-eslint/parser": "^5.54.1",
+    "eslint": "^8.35.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.7.0",
+    "eslint-import-resolver-typescript": "^3.5.3",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.4",
+    "rimraf": "^4.4.0",
+    "typescript": "^4.9.5"
+  }
+}
