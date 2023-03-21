@@ -1,3 +1,6 @@
+/**
+ * Dicionário de códigos de erro da API com as respectivas mensagens de erro.
+ */
 export const apiErrosTranslate: Record<string, string> = {
   'application/validations-fail': 'Falha de validação, verifique os dados e tente novamente!',
   'application/token-missing': 'Ops! Houve um erro, renicie a pagina e tente novamente!',
@@ -22,3 +25,17 @@ export const apiErrosTranslate: Record<string, string> = {
   'auth/invalid-verification-id': 'Sua credencial está inválida.',
   'auth/requires-recent-login': 'Por favor deslogue do aplicativo e entre novamente.'
 };
+
+/**
+ * Retorna a mensagem de erro correspondente a um determinado código de erro.
+ *
+ * @param errorCode O código de erro.
+ * @param defaultMessage A mensagem de erro padrão a ser usada se não houver nenhuma mensagem correspondente ao código de erro fornecido.
+ * @returns A mensagem de erro correspondente ao código de erro fornecido, ou a mensagem de erro padrão se não houver nenhuma mensagem correspondente.
+ */
+export function getApiError(
+  errorCode: string,
+  defaultMessage = 'Não foi possível concluir sua solicitação, por favor tente novamente.'
+): string {
+  return apiErrosTranslate[errorCode] ?? defaultMessage;
+}
