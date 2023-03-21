@@ -1,6 +1,6 @@
-import { CollectionReference, DocumentData, Firestore, SetOptions } from '@angular/fire/firestore';
+import { CollectionReference, DocumentData, Firestore, OrderByDirection, SetOptions, WhereFilterOp } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { AddDocument, SetDocument, UpdateDocument } from '../typings/repoTypes.js';
+import { AddDocument, IFirebaseWhere, SetDocument, UpdateDocument } from '../typings/repoTypes.js';
 import { Model } from './Model.js';
 type IWriteOptions = {
     /**
@@ -95,6 +95,34 @@ export declare abstract class FirebaseAbstract<T extends Model> {
      * @returns Um `Promise` resolvida com o conteúdo do documentos.
      */
     getAll(options?: IReadOptions): Promise<T[]>;
+    /**
+     * Recupera documentos da coleção com base no campo, operador e valor fornecidos, bem como em opções adicionais.
+     *
+     * @async
+     * @param {keyof T} field - A chave do campo pelo qual os documentos devem ser filtrados.
+     * @param {WhereFilterOp} operator - O operador a ser usado na filtragem (por exemplo, "==" ou ">").
+     * @param {unknown} value - O valor a ser comparado na filtragem.
+     * @param {number | null} [limit=null] - O número máximo de documentos a serem retornados.
+     * @param {keyof T | null} [orderBy=null] - A chave do campo pelo qual os resultados devem ser ordenados.
+     * @param {OrderByDirection | null} [orderByDirection=null] - A direção na qual os resultados devem ser ordenados.
+     * @param {IReadOptions} [options={ timestamps: true }] - As opções adicionais para a leitura dos documentos.
+     * @returns {Promise<T[]>} - Uma promessa que resolve em um array de documentos T.
+     * @throws {DocumentNotFoundError} - Se nenhum documento for encontrado com os filtros fornecidos.
+     */
+    protected getWhere(field: keyof T, operator: WhereFilterOp, value: unknown, limit?: number | null, orderBy?: keyof T | null, orderByDirection?: OrderByDirection | null, options?: IReadOptions): Promise<T[]>;
+    /**
+     * Recupera vários documentos da coleção com base nos filtros fornecidos e opções adicionais.
+     *
+     * @async
+     * @param {IFirebaseWhere<T>[]} filters - Um array de objetos de filtro Firebase, cada um contendo um campo, um operador e um valor.
+     * @param {number | null} [limit=null] - O número máximo de documentos a serem retornados.
+     * @param {keyof T | null} [orderBy=null] - A chave do campo pelo qual os resultados devem ser ordenados.
+     * @param {OrderByDirection | null} [orderByDirection=null] - A direção na qual os resultados devem ser ordenados.
+     * @param {IReadOptions} [options={ timestamps: true }] - As opções adicionais para a leitura dos documentos.
+     * @returns {Promise<T[]>} - Uma promessa que resolve em um array de documentos T.
+     * @throws {DocumentNotFoundError} - Se nenhum documento for encontrado com os filtros fornecidos.
+     */
+    protected getWhereMany(filters: IFirebaseWhere<T>[], limit?: number | null, orderBy?: keyof T | null, orderByDirection?: OrderByDirection | null, options?: IReadOptions): Promise<T[]>;
     /**
      * Obtém uma instância `CollectionReference` que se refere à coleção no caminho absoluto especificado por `collectionName`.
      *

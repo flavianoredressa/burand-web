@@ -9,16 +9,23 @@ import {
   Firestore,
   getDoc,
   getDocs,
+  orderBy as queryOrderBy,
+  OrderByDirection,
+  limit as queryLimit,
+  query,
+  QueryConstraint,
   serverTimestamp,
   setDoc,
   SetOptions,
-  updateDoc
+  updateDoc,
+  where,
+  WhereFilterOp
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { DocumentNotFoundError } from '../exceptions/DocumentNotFoundError.js';
-import { AddDocument, SetDocument, UpdateDocument } from '../typings/repoTypes.js';
+import { AddDocument, IFirebaseWhere, SetDocument, UpdateDocument } from '../typings/repoTypes.js';
 import { ofFirestore } from './ofFirestore.js';
 import { toFirestore } from './toFirestore.js';
 import { Model } from './Model.js';
@@ -183,6 +190,92 @@ export abstract class FirebaseAbstract<T extends Model> {
    */
   public async getAll(options: IReadOptions = { timestamps: true }): Promise<T[]> {
     const { docs } = await getDocs(this.collection());
+    return docs.map(document => ofFirestore(document, options.timestamps));
+  }
+
+  /**
+   * Recupera documentos da coleção com base no campo, operador e valor fornecidos, bem como em opções adicionais.
+   *
+   * @async
+   * @param {keyof T} field - A chave do campo pelo qual os documentos devem ser filtrados.
+   * @param {WhereFilterOp} operator - O operador a ser usado na filtragem (por exemplo, "==" ou ">").
+   * @param {unknown} value - O valor a ser comparado na filtragem.
+   * @param {number | null} [limit=null] - O número máximo de documentos a serem retornados.
+   * @param {keyof T | null} [orderBy=null] - A chave do campo pelo qual os resultados devem ser ordenados.
+   * @param {OrderByDirection | null} [orderByDirection=null] - A direção na qual os resultados devem ser ordenados.
+   * @param {IReadOptions} [options={ timestamps: true }] - As opções adicionais para a leitura dos documentos.
+   * @returns {Promise<T[]>} - Uma promessa que resolve em um array de documentos T.
+   * @throws {DocumentNotFoundError} - Se nenhum documento for encontrado com os filtros fornecidos.
+   */
+  protected async getWhere(
+    field: keyof T,
+    operator: WhereFilterOp,
+    value: unknown,
+    limit: number | null = null,
+    orderBy: keyof T | null = null,
+    orderByDirection: OrderByDirection | null = null,
+    options: IReadOptions = { timestamps: true }
+  ): Promise<T[]> {
+    const queryFilter: QueryConstraint[] = [where(field as string, operator, value)];
+
+    if (limit) {
+      queryFilter.push(queryLimit(limit));
+    }
+
+    if (orderBy) {
+      queryFilter.push(queryOrderBy(orderBy as string, orderByDirection || 'asc'));
+    }
+
+    const q = query(this.collection(), ...queryFilter);
+
+    const { docs, empty } = await getDocs(q);
+
+    if (empty) {
+      throw new DocumentNotFoundError(JSON.stringify({ field, operator, value }));
+    }
+
+    return docs.map(document => ofFirestore(document, options.timestamps));
+  }
+
+  /**
+   * Recupera vários documentos da coleção com base nos filtros fornecidos e opções adicionais.
+   *
+   * @async
+   * @param {IFirebaseWhere<T>[]} filters - Um array de objetos de filtro Firebase, cada um contendo um campo, um operador e um valor.
+   * @param {number | null} [limit=null] - O número máximo de documentos a serem retornados.
+   * @param {keyof T | null} [orderBy=null] - A chave do campo pelo qual os resultados devem ser ordenados.
+   * @param {OrderByDirection | null} [orderByDirection=null] - A direção na qual os resultados devem ser ordenados.
+   * @param {IReadOptions} [options={ timestamps: true }] - As opções adicionais para a leitura dos documentos.
+   * @returns {Promise<T[]>} - Uma promessa que resolve em um array de documentos T.
+   * @throws {DocumentNotFoundError} - Se nenhum documento for encontrado com os filtros fornecidos.
+   */
+  protected async getWhereMany(
+    filters: IFirebaseWhere<T>[],
+    limit: number | null = null,
+    orderBy: keyof T | null = null,
+    orderByDirection: OrderByDirection | null = null,
+    options: IReadOptions = { timestamps: true }
+  ): Promise<T[]> {
+    const queryFilter: QueryConstraint[] = filters.map(({ field, operator, value }) => {
+      return where(field as string, operator, value);
+    });
+
+    if (orderBy) {
+      queryFilter.push(queryOrderBy(orderBy as string, orderByDirection || 'asc'));
+    }
+
+    if (limit) {
+      queryFilter.push(queryLimit(limit));
+    }
+
+    const q = query(this.collection(), ...queryFilter);
+
+    const { docs, empty } = await getDocs(q);
+
+    if (empty) {
+      throw new DocumentNotFoundError(JSON.stringify({ filters }));
+    }
+
     return docs.map(document => ofFirestore(document, options.timestamps));
   }
 

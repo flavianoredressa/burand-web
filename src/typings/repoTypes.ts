@@ -1,4 +1,4 @@
-import { FieldValue } from '@angular/fire/firestore';
+import { FieldValue, WhereFilterOp } from '@angular/fire/firestore';
 import { Model } from '../firestore/Model.js';
 
 /**
@@ -30,3 +30,17 @@ export type SetDocument<T extends Model> = {
 export type UpdateDocument<T extends Model> = {
   [P in keyof Omit<T, 'id' | 'createdAt' | 'updatedAt'>]?: T[P] | FieldValue;
 } & Pick<T, 'id'>;
+
+/**
+ * Define um tipo para uma cláusula where do Firebase.
+ *
+ * @template T - Um tipo genérico que estende o modelo de dados.
+ * @property {keyof T} field - A chave do campo no modelo de dados a ser usado na cláusula where.
+ * @property {WhereFilterOp} operator - O operador a ser usado na cláusula where (por exemplo, "==" ou ">").
+ * @property {unknown} value - O valor a ser comparado na cláusula where.
+ */
+export type IFirebaseWhere<T extends Model> = {
+  field: keyof T;
+  operator: WhereFilterOp;
+  value: unknown;
+};
